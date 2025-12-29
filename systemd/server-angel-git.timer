@@ -1,0 +1,12 @@
+[Unit]
+Description=Server Angel Git Watch Timer
+Requires=server-angel.service
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+Persistent=true
+Unit=server-angel.service
+
+[Install]
+WantedBy=timers.target

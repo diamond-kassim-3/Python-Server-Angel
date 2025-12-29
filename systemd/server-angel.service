@@ -1,0 +1,16 @@
+[Unit]
+Description=Server Angel - Server Automation Agent
+After=network.target
+
+[Service]
+Type=oneshot
+User=www-data
+Group=www-data
+WorkingDirectory=<SERVER_ANGEL_ROOT>
+ExecStart=<PYTHON_PATH> <SERVER_ANGEL_ROOT>/angel.py --mode=<MODE>
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
