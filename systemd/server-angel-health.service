@@ -1,0 +1,10 @@
+[Unit]
+Description=Server Angel Health Check
+After=network.target
+
+[Service]
+Type=oneshot
+User=<USER>
+WorkingDirectory=<PROJECT_ROOT>
+EnvironmentFile=<PROJECT_ROOT>/.env
+ExecStart=<VENV_PATH>/bin/python3 <PROJECT_ROOT>/angel.py --mode=health-check

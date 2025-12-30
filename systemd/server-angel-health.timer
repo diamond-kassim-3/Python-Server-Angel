@@ -1,12 +1,12 @@
 [Unit]
 Description=Server Angel Health Check Timer
-Requires=server-angel.service
+Requires=server-angel-health.service
 
 [Timer]
 OnCalendar=*-*-* 07:00:00
 OnCalendar=*-*-* 19:00:00
 Persistent=true
-Unit=server-angel.service
+Unit=server-angel-health.service
 
 [Install]
 WantedBy=timers.target

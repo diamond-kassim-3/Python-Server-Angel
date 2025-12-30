@@ -36,3 +36,5 @@ desktop.ini
 dist/
 build/
 *.egg-info/
+
+#kwari_server_config.py
