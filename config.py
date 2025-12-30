@@ -3,6 +3,7 @@ Server Angel Configuration
 """
 
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -25,9 +26,10 @@ class Config:
     # ============================
     # Systemd service names to monitor and restart
     NGINX_SERVICE = os.getenv('NGINX_SERVICE', 'nginx')
+    NGINX_SERVICE = os.getenv('NGINX_SERVICE', 'nginx')
     GUNICORN_SERVICE = os.getenv('GUNICORN_SERVICE', 'gunicorn')
-    REDIS_SERVICE = os.getenv('REDIS_SERVICE', 'redis')
-    CELERY_SERVICE = os.getenv('CELERY_SERVICE', 'celery')
+    REDIS_SERVICE = os.getenv('REDIS_SERVICE', None)
+    CELERY_SERVICE = os.getenv('CELERY_SERVICE', None)
 
     # ============================
     # EXTERNAL SERVICES
@@ -60,6 +62,15 @@ class Config:
     # ============================
     MORNING_REPORT = os.getenv('MORNING_REPORT', '08:00')
     EVENING_REPORT = os.getenv('EVENING_REPORT', '20:00')
+
+    # ============================
+    # SERVER ANGEL PATHS
+    # ============================
+    ANGEL_ROOT = Path(__file__).parent
+    STATE_DIR = ANGEL_ROOT / 'state'
+    LOG_DIR = ANGEL_ROOT / 'logs'
+    LAST_COMMIT_FILE = STATE_DIR / 'last_commit.txt'
+    LOG_FILE = LOG_DIR / 'angel.log'
 
     @classmethod
     def validate(cls):

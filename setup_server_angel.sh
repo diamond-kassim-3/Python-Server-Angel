@@ -18,8 +18,12 @@ prompt() {
 
 # 1. Gather Configuration
 CURRENT_DIR=$(pwd)
-PROJECT_ROOT=$(prompt "PROJECT_ROOT" "Enter absolute path to Server Angel directory" "$CURRENT_DIR")
-VENV_PATH=$(prompt "VENV_PATH" "Enter absolute path to Python Virtual Environment" "$CURRENT_DIR/venv")
+# Default PROJECT_ROOT assumption: Parent of current dir if named Python-Server-Angel, else current specific path
+DEFAULT_PROJECT_ROOT="/var/www/kwari-core-api"
+DEFAULT_VENV_PATH="/var/www/Kwari_core_env"
+
+PROJECT_ROOT=$(prompt "PROJECT_ROOT" "Enter absolute path to PROJECT ROOT" "$DEFAULT_PROJECT_ROOT")
+VENV_PATH=$(prompt "VENV_PATH" "Enter absolute path to Python Virtual Environment" "$DEFAULT_VENV_PATH")
 SERVICE_USER=$(prompt "SERVICE_USER" "Enter system user to run services" "$(whoami)")
 
 echo ""

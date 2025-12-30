@@ -1,11 +1,12 @@
-# 🛡️ Server Angel v2.01
+# 🛡️ Server Angel v2.01.1
 
 **Standalone Server Automation Agent**
 
 Server Angel monitors your server health and automatically deploys updates from your production Git branch. It sends daily health reports and deployment notifications via email.
 
-## 🎉 What's New in v2.0
+## 🎉 What's New in v2.01.1
 
+- 🎨 **HTML Email Reports**: Beautiful, responsive email templates with status badges and progress bars
 - 🤖 **Automated Setup**: New `setup_server_angel.sh` script for interactive installation
 - 🔧 **Dedicated Services**: Split architecture into `server-angel-health` and `server-angel-git` for better stability
 - ✅ **Fixed Critical Bug**: `format_bytes` now shows actual memory/disk values instead of ".1f"

@@ -14,20 +14,24 @@ class EmailMailer:
     """Handles email sending via SMTP."""
 
     @staticmethod
-    def send_email(subject, body, recipients=None):
-        """Send email with given subject and body."""
+    def send_email(subject, text_body, html_body=None, recipients=None):
+        """Send email with subject, text body, and optional HTML body."""
         if recipients is None:
             recipients = Config.EMAIL_RECIPIENTS
 
         try:
-            # Create message
-            msg = MIMEMultipart()
+            # Create message container - 'alternative' ensures clients choose the best display option
+            msg = MIMEMultipart('alternative')
             msg['From'] = Config.EMAIL_FROM
             msg['To'] = ', '.join(recipients)
             msg['Subject'] = subject
 
-            # Add body
-            msg.attach(MIMEText(body, 'plain'))
+            # Attach parts
+            # The order matters: text/plain first, then text/html
+            msg.attach(MIMEText(text_body, 'plain'))
+            
+            if html_body:
+                msg.attach(MIMEText(html_body, 'html'))
 
             # Create SMTP connection based on port
             if Config.SMTP_PORT == 465:
@@ -45,8 +49,7 @@ class EmailMailer:
             logging.info("SMTP authentication successful")
 
             # Send email
-            text = msg.as_string()
-            server.sendmail(Config.EMAIL_FROM, recipients, text)
+            server.sendmail(Config.EMAIL_FROM, recipients, msg.as_string())
             logging.info(f"Email sent to {len(recipients)} recipients")
 
             # Close connection
@@ -79,24 +82,24 @@ class EmailMailer:
         """Send health check report email."""
         from reporter import EmailReporter
 
-        subject, body = EmailReporter.build_health_report(health_data, report_type)
-        return EmailMailer.send_email(subject, body)
+        subject, text, html = EmailReporter.build_health_report(health_data, report_type)
+        return EmailMailer.send_email(subject, text, html)
 
     @staticmethod
     def send_deployment_report(deployment_data):
         """Send deployment notification email."""
         from reporter import EmailReporter
 
-        subject, body = EmailReporter.build_deployment_report(deployment_data)
-        return EmailMailer.send_email(subject, body)
+        subject, text, html = EmailReporter.build_deployment_report(deployment_data)
+        return EmailMailer.send_email(subject, text, html)
 
     @staticmethod
     def send_error_alert(error_message, context="general"):
         """Send error alert email."""
         from reporter import EmailReporter
 
-        subject, body = EmailReporter.build_error_report(error_message, context)
-        return EmailMailer.send_email(subject, body)
+        subject, text, html = EmailReporter.build_error_report(error_message, context)
+        return EmailMailer.send_email(subject, text, html)
 
     @staticmethod
     def test_connection():
