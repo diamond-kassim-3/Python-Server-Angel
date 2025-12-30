@@ -1,4 +1,4 @@
-# 🛡️ Server Angel v2.0
+# 🛡️ Server Angel v2.01
 
 **Standalone Server Automation Agent**
 
@@ -6,6 +6,8 @@ Server Angel monitors your server health and automatically deploys updates from 
 
 ## 🎉 What's New in v2.0
 
+- 🤖 **Automated Setup**: New `setup_server_angel.sh` script for interactive installation
+- 🔧 **Dedicated Services**: Split architecture into `server-angel-health` and `server-angel-git` for better stability
 - ✅ **Fixed Critical Bug**: `format_bytes` now shows actual memory/disk values instead of ".1f"
 - 🔐 **.env File Support**: Easy configuration with environment files
 - 🔄 **Retry Logic**: Automatic retry for transient Git failures (3 attempts)
@@ -50,8 +52,10 @@ server-angel/
 ├── logs/
 │   └── angel.log         # Execution logs
 │
+├── setup_server_angel.sh   # Automated setup script (New in v2.01)
 ├── systemd/
-│   ├── server-angel.service         # Systemd service definition
+│   ├── server-angel-health.service  # Health check service definition
+│   ├── server-angel-git.service     # Git watcher service definition
 │   ├── server-angel-health.timer    # Health check scheduler (7 AM & 7 PM)
 │   └── server-angel-git.timer       # Git watch scheduler (every 5 min)
 │
@@ -192,36 +196,34 @@ pip install -r requirements.txt
 sudo pip3 install -r requirements.txt
 ```
 
-### 4. Update Systemd Files
+### 4. Run Setup Script (Recommended)
 
-Edit the systemd files to replace placeholders:
+Server Angel v2.01 comes with an automated setup script that configures everything for you.
 
-**systemd/server-angel.service:**
 ```bash
-# Replace:
-WorkingDirectory=<SERVER_ANGEL_ROOT>
-ExecStart=<PYTHON_PATH> <SERVER_ANGEL_ROOT>/angel.py --mode=<MODE>
+# Make script executable
+chmod +x setup_server_angel.sh
 
-# With:
-WorkingDirectory=/var/www/server-angel
-ExecStart=/usr/bin/python3 /var/www/server-angel/angel.py --mode=<MODE>
+# Run setup
+./setup_server_angel.sh
 ```
 
-### 5. Install Systemd Services
+Follow the interactive prompts to:
+1. Enter your project and venv paths
+2. Confirm your configuration
+3. Automatically install systemd services and timers
+
+### 5. Manual Setup (Alternative)
+
+If you prefer to set up manually, edit the systemd files in `systemd/` directory to replace `<PROJECT_ROOT>`, `<VENV_PATH>`, and `<USER>` placeholders, then copy them to `/etc/systemd/system/`.
 
 ```bash
-# Copy service files
+# Example manual command
 sudo cp systemd/*.service /etc/systemd/system/
 sudo cp systemd/*.timer /etc/systemd/system/
-
-# Reload systemd
 sudo systemctl daemon-reload
-
-# Enable and start timers
-sudo systemctl enable server-angel-health.timer
-sudo systemctl enable server-angel-git.timer
-sudo systemctl start server-angel-health.timer
-sudo systemctl start server-angel-git.timer
+sudo systemctl enable --now server-angel-health.timer
+sudo systemctl enable --now server-angel-git.timer
 ```
 
 ### 4. Test Setup
@@ -242,6 +244,10 @@ python3 angel.py --mode=git-watch
 # Check status
 sudo systemctl status server-angel-health.timer
 sudo systemctl status server-angel-git.timer
+
+# Trigger manual run via service
+sudo systemctl start server-angel-health.service
+sudo systemctl start server-angel-git.service
 ```
 
 ## 📧 Email Reports
@@ -385,11 +391,12 @@ All services have been updated and restarted.
 Check logs at `logs/angel.log` or systemd journal:
 
 ```bash
-# View recent logs
-sudo journalctl -u server-angel.service -n 50
+# View recent logs for specific services
+sudo journalctl -u server-angel-health.service -n 50
+sudo journalctl -u server-angel-git.service -n 50
 
 # Follow logs
-sudo journalctl -u server-angel.service -f
+sudo journalctl -u server-angel-health.service -f
 ```
 
 ## 💡 Best Practices\n\n### Security\n1. **Protect Credentials**:\n   ```bash\n   chmod 600 .env\n   chown www-data:www-data .env\n   ```\n\n2. **Use App Passwords**: Never use your main email password\n   - Gmail: https://myaccount.google.com/apppasswords\n   - Outlook: https://account.live.com/proofs/AppPassword\n\n3. **Limit Sudo Access**: Create specific sudoers rules for service restarts\n   ```bash\n   # /etc/sudoers.d/server-angel\n   www-data ALL= NOPASSWD: /bin/systemctl restart nginx\n   www-data ALL= NOPASSWD: /bin/systemctl restart gunicorn\n   ```\n\n4. **Git Authentication**: Use SSH keys or deploy tokens (not passwords)\n\n### Monitoring\n1. **Regular Log Review**:\n   ```bash\n   # Check today's activity\n   sudo journalctl -u server-angel.service --since today\n   \n   # Monitor in real-time\n   tail -f /var/www/server-angel/logs/angel.log\n   ```\n\n2. **Email Folder Organization**: Create email filters for:\n   - Health reports → \"Server Angel/Health\"\n   - Deployment reports → \"Server Angel/Deployments\"\n   - Error alerts → \"Server Angel/Errors\" (with notifications)\n\n3. **Health Report Analysis**:\n   - Watch for increasing CPU/memory trends\n   - Monitor disk space approaching 80%\n   - Track service restart patterns\n\n### Deployment Strategy\n1. **Testing Branch First**: Test on staging before production\n2. **Off-Peak Deployments**: Schedule major updates during low traffic\n3. **Gradual Rollout**: For multiple servers, deploy one at a time\n4. **Backup Before Deploy**: Ensure database backups are current\n\n### Maintenance\n1. **Weekly**:\n   - Review health reports for trends\n   - Check log file sizes\n   - Verify email delivery\n\n2. **Monthly**:\n   - Review deployed commits vs Git history\n   - Update Server Angel if new version available\n   - Rotate logs if needed\n\n3. **Quarterly**:\n   - Test disaster recovery (manual deployment)\n   - Update SMTP credentials if rotated\n   - Review and update service list\n\n## 🔒 Security Notes
